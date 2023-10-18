@@ -1,7 +1,7 @@
 # Facial-Recognition-Neural-Network
 
 File Access
------------------
+-=-=-=-=-=-=-=-=-=-=-=-=
 dataImages: data set with images of me and my family members- used to train the AI
   albe:   PNG list with images of me
   chichi: PNG list with images of chichi
@@ -16,7 +16,7 @@ facialNetwork: code that the AI uses to function
   
 LICENSE.txt: programs copyright license 
 README.md:   information about the program (where you are now :) )
------------------
+-=-=-=-=-=-=-=-=-=-=-=-=
 
 **Useage**
 This Network's soul purpose as of now is to determine if the photo its analysing is a photo of me, or a photo of
