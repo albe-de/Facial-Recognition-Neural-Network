@@ -29,4 +29,3 @@ facialNetwork: code that the AI uses to function
     
 LICENSE.txt: programs copyright license 
 README.md:   information about the program (where you are now :) )
-<pre>
