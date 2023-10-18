@@ -1,29 +1,22 @@
+<pre>
 # Facial-Recognition-Neural-Network
 
 File Access
-<pre>
 -=-=-=-=-=-=-=-=-=-=-=-=
-  <pre>
 dataImages: data set with images of me and my family members- used to train the AI
   albe:   PNG list with images of me
   chichi: PNG list with images of chichi
   dad:    PNG list with images of my dad
   mom:    PNG list with images of my mom
   rudy:   PNG list with images of rudy
-  
-    <pre>
       
 facialNetwork: code that the AI uses to function
   __pycache__:   regular pycache file
   imageSplit.py: class to pull and process images from dataImages
   v3.py:         neural network class + execution 
-  
-      <pre>
     
 LICENSE.txt: programs copyright license 
 README.md:   information about the program (where you are now :) )
-<pre>
-  
 -=-=-=-=-=-=-=-=-=-=-=-=
 
 **Useage**
@@ -36,5 +29,4 @@ code (like the hashmap in network->testNetwork)
 
 **License**
 You can use the code for whatever you'd like so long as you dont steal/take credit for it and you dont sell it.
-
 (MIT license) 
