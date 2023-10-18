@@ -1,6 +1,7 @@
 # Facial-Recognition-Neural-Network
 
 File Access
+
 -=-=-=-=-=-=-=-=-=-=-=-=
 
 dataImages: data set with images of me and my family members- used to train the AI
@@ -30,4 +31,5 @@ code (like the hashmap in network->testNetwork)
 
 **License**
 You can use the code for whatever you'd like so long as you dont steal/take credit for it and you dont sell it.
+
 (MIT license) 
