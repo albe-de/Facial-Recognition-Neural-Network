@@ -5,7 +5,7 @@ File Access
 -=-=-=-=-=-=-=-=-=-=-=-=
 
 dataImages: data set with images of me and my family members- used to train the AI
-  albe:   PNG list with images of me\n
+  albe:   PNG list with images of me/n
   chichi: PNG list with images of chichi
   dad:    PNG list with images of my dad
   mom:    PNG list with images of my mom
