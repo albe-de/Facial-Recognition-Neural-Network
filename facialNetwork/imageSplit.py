@@ -3,7 +3,7 @@ from PIL import Image
 import random
 import os
 
-dataFolder = r'C:\Users\albed\Desktop\NeuralNetwork\Facial Recognition Neural Network\dataImages'
+dataFolder = r'C:\Users\albed\Desktop\NeuralNetwork\Facial AI Github\dataImages'
 
 class processImage():
     def __init__(self):
