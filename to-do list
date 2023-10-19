@@ -1,0 +1,7 @@
+-- To Do --
+
+1) Backpropogation/Some way to optimize weights
+2) Compute time optimizations (2c/s)
+3) Threading (Could be apart of '2')
+4) Multipurposing network class (beyond just analysing data)
+5) Image generation (Potentially apart of '4')
