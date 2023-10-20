@@ -9,18 +9,18 @@ class processImage():
     def __init__(self):
         pass
 
-    def image(self, user):
+    def pullImage(self, user):
         folderDecendants = os.listdir(dataFolder + f'\{user}')
 
         # Finds all PNG items within a folder
         folderDecendants = [item for item in folderDecendants if item.endswith('.png')]
         return random.choice(folderDecendants)
 
-    def randomImage(self):
+    def image(self, picked=None):
         possibilities = ['albe', 'chichi', 'dad', 'mom', 'rudy']
-        picked = possibilities[random.randint(0, 4)]
+        picked = picked if picked else random.choice(possibilities) 
 
-        directory = self.image(picked)
+        directory = self.pullImage(picked)
         imagePath = os.path.join(dataFolder, picked, directory)
 
         return [imagePath, picked]

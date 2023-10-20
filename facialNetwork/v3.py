@@ -80,7 +80,7 @@ class network():
                 neuronValue = self.outputNeuron(currentLayer, nextLayer[neuron])
                 nextLayer[neuron] = neuronValue
         
-        # calculate cost
+        # calculate cost (N0 = Albe, N1 = Not Albe)
         cost, currentLayer = 0, self.tempData[-1]
         expectedOutput = self.expectedOutput[expectedOutput]
         actualOutput = currentLayer.index(max(currentLayer))
@@ -91,7 +91,7 @@ class network():
             currentLayer[i] -= 1 if (i != expectedOutput) else 0
             cost += currentLayer[i] ** 2
             
-        return [cost, bool(actualOutput == expectedOutput)]
+        return [cost, bool(actualOutput == expectedOutput), actualOutput]
 
     # trains the network for the most optimal weights
     def trainNetwork(self, tests: int, trials: int):
@@ -107,7 +107,7 @@ class network():
 
             startingTime = time.time()
             for trialCount in range(trials):
-                randomImage = facialData.randomImage()
+                randomImage = facialData.image()
                 pixels = facialData.convertImage(randomImage[0], self.inputSize, False)
 
                 testInfo = self.testNetwork(pixels, randomImage[1])
@@ -130,7 +130,7 @@ class network():
             self.beforeInput = self.tempData
 
 
-randomImage = facialData.randomImage()[0]
+randomImage = facialData.image()[0]
 pixels = facialData.convertImage(randomImage, 192, False)
 
 # network ( [Inputs, Layer Xi, Outputs] )
@@ -138,17 +138,30 @@ neural = network( [len(pixels), 10, 2] )
 neural.trainNetwork(50, 5)
 
 
-# Testing Accuracy
-# Not required for code to function
+# accuracy testing (non-visual)
 accuracy = 0
 print(Fore.MAGENTA + f'\nTesting Accuracy... ' + Fore.WHITE)
 
 for testNum in range(50):
-    randomImage = facialData.randomImage()
-    pixels = facialData.convertImage(randomImage[0], neural.inputSize, False)
+    ra = facialData.image()
+    pix = facialData.convertImage(ra[0], neural.inputSize, False)
 
-    testInfo = neural.testNetwork(pixels, randomImage[1])
+    testInfo = neural.testNetwork(pix, ra[1])
     if testInfo[1] == True:
         accuracy += 1
 
 print(f'Network has an accuracy of {(accuracy/50) * 100}%')
+
+
+# Visual testing
+for _ in range(3):
+    if _%4==0:
+        ra = facialData.image()
+    else:
+        ra = facialData.image('albe')
+
+    pix = facialData.convertImage(ra[0], neural.inputSize, True)
+
+    testInfo = neural.testNetwork(pix, ra[1])
+    formatted = 'Is' if (testInfo[2] == 0) else 'Not'
+    print(f'{formatted} a picture of albe.. (Thats a {testInfo[1]} statement)')
