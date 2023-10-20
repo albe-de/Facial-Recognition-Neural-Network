@@ -154,8 +154,8 @@ print(f'Network has an accuracy of {(accuracy/50) * 100}%')
 
 
 # Visual testing
-for _ in range(3):
-    if _%4==0:
+for _ in range(4):
+    if _%4!=0:
         ra = facialData.image()
     else:
         ra = facialData.image('albe')

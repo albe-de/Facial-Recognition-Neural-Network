@@ -1,10 +1,8 @@
 -- To Do --
 
-1) Backpropogation/Some way to optimize weights
-2) Compute time optimizations (2c/s)
-3) Threading (Could be apart of '2')
-4) Multipurposing network class (beyond just analysing data)
-5) Image generation (Potentially apart of '4')
+1) Backpropogation/Some way to optimize weights (below)
+2) Compute time optimizations (2c/s) -> threading/multiprocessing
+4) Image generation/repurposing network
 
 
 --
@@ -12,3 +10,9 @@ Start at weights of [0, 0, 0, 0, 0, ..ect]
 change w[0] by step every frame and get value
 find optimal step for w[0] until it cant get any better
 repeat for w[1-i]
+
+-- Experimental data
+[len, 10, 2] -> 50-82 avg 70
+[len, 16, 8, 2] -> 40-60 avg 48
+[len, 16, 2] -> 50-64 avg 56
+[len, 2] -> 5-20 avg 15
