@@ -10,13 +10,16 @@ import threading
 import random
 import math
 import time
+import sys
+import os
 facialData = processImage()
 
 
 class network():
-    def __init__(self, networkInfo):
+    def __init__(self, networkInfo, outputLayer):
         self.inputSize = networkInfo[0]
         self.layers = self.storedData = []
+        self.outputLayer = outputLayer
 
         # loops through network info to create
         # all the nessesary neurons/layers
@@ -103,12 +106,21 @@ class network():
         if ret: ret[1] += cost
         return [cost, bool(actualOutput == expectedOutput), actualOutput]
 
+    # loading bar animation in output
+    def loadingBar(self, iteration, total, barLen=50):
+        arrow = '=' * int(round((iteration / total) * barLen))
+        spaces = ' ' * (barLen - len(arrow))
+        sys.stdout.write(f'[{arrow}>{spaces}] {(iteration / total) * 100:.2f}%\r')
+        sys.stdout.flush()
+
     # trains the network for the most optimal weights
     def trainNetwork(self, tests: int, trials: int):
-        # creates starting values for neurons
-        self.valueNeurons()
+        totalIterations = 1
+        os.system('cls')
+
         booleanColors = {True: Fore.GREEN, False: Fore.RED}
         self.layers = self.beforeInput = self.tempData
+        print('Training...')
 
         # loops (tests) times to generate new
         # weights, biases, & costs
@@ -127,6 +139,9 @@ class network():
                 threads[trialCount] = threading.Thread(target=self.testNetwork, args=arguments)
                 threads[trialCount].start()
 
+                self.loadingBar(totalIterations, tests*trials)
+                totalIterations += 1
+
             # waits for all tests to finish and adds up all cost
             for thread in threads: thread.join()
             self.costData[1] /= trials
@@ -136,35 +151,31 @@ class network():
                 self.layers = self.beforeInput # updates layers (Best Weights)
                 self.costData[0] = self.costData[1] # updates lowest cost
                 
-            print(booleanColors[bestCost] + f'Cost: {self.costData[1]}' + Fore.WHITE)
-            print(f'--> Compute Time: {time.time() - startingTime}\n')
-            self.costData[1] = 0    
-                
-            # -> Value neurons here (backpropogate/whatever)
+            self.costData[1] = 0 
             self.valueNeurons()
             self.beforeInput = self.tempData
+        
+        print('')
+        print(f'Cost: {self.costData[0]}' + Fore.WHITE)
 
     # converts expectedOutput to activated neuron
     def convertEXPO(self, output):
-        data = {'albe': 0, 'mom': 1, 'dad':2, 'rudy':3, 'chichi':4}
-
-        try:
-            return data[output]
-        except:
-            return {value: key for key, value in data.items()}[output]
+        try: return self.outputLayer[output]
+        except: return {v:k for k, v in self.outputLayer.items()}[output]
 
 
 randomImage = facialData.image()[0]
 pixels = facialData.convertImage(randomImage, 192, False)
 
-# network ( [Inputs, Layer Xi, Outputs] )
-neural = network( [len(pixels), 10, 5] )
+# network ( [Inputs, Layer Xo -Xm, outputLen] )
+outputLayer = {'albe': 0, 'mom': 1, 'dad':2, 'rudy': 3, 'chichi': 4}
+neural = network([len(pixels), 10, 5, len(outputLayer)], outputLayer)
 neural.trainNetwork(25, 10)
 
 
 # accuracy testing (non-visual)
 accuracy = 0
-print(Fore.MAGENTA + f'\nTesting Accuracy... ' + Fore.WHITE)
+print(f'\nTesting Accuracy... ' + Fore.WHITE)
 
 avgComputeTime = time.time()
 for testNum in range(50):
@@ -176,7 +187,7 @@ for testNum in range(50):
         accuracy += 1
 
 ips = math.floor(60 / (( time.time() - avgComputeTime) / 50))
-print(f'Analyze\'s {ips}im/s with {(accuracy/50) * 100}% Accuracy')
+print(f'Analyze\'s {ips}im/s with {(accuracy/50) * 100}% Accuracy \n')
 
 
 # Visual testing
