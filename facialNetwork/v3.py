@@ -40,17 +40,7 @@ class network():
         # layers -> list of weights that gets saved (best performant)
         self.tempData = self.beforeInput = self.layers
         self.costData = [5000, 0] # perm, temp
-
-    # converts expectedOutput to activated neuron
-    def convertEXPO(self, output, rvs=False):
-        if rvs:
-            data = {0:'albe', 1:'mom', 2:'dad', 3:'rudy', 4:'chichi'}
-            return data[output]
         
-        else:
-            data = {'albe': 0, 'mom': 1, 'dad':2, 'rudy':3, 'chichi':4}
-            return data[output]
-
     # values EVERY NEURON IN THE NETWORK
     def valueNeurons(self, weights=None):
         for Li in range(len(self.tempData)):
@@ -154,6 +144,15 @@ class network():
             self.valueNeurons()
             self.beforeInput = self.tempData
 
+    # converts expectedOutput to activated neuron
+    def convertEXPO(self, output):
+        data = {'albe': 0, 'mom': 1, 'dad':2, 'rudy':3, 'chichi':4}
+
+        try:
+            return data[output]
+        except:
+            return {value: key for key, value in data.items()}[output]
+
 
 randomImage = facialData.image()[0]
 pixels = facialData.convertImage(randomImage, 192, False)
@@ -187,4 +186,4 @@ for _ in range(4):
 
     testInfo = neural.testNetwork(pix, neural.convertEXPO(img[1]))
     formatted = Fore.GREEN if testInfo[1] else Fore.RED
-    print(formatted + f'{neural.convertEXPO(testInfo[2], True)}' + Fore.WHITE)
+    print(formatted + f'{neural.convertEXPO(testInfo[2])}' + Fore.WHITE)
