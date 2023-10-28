@@ -2,8 +2,6 @@
 # 10/17/2023
 # Facial Recognition AI
 
-# repurpose network by editing network -> 'convertExpo'
-
 from imageSplit import processImage
 from colorama import Fore
 import threading
@@ -64,9 +62,11 @@ class network():
         xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
         
         output = math.tanh(xPos)
-        ''' output = math.tanh(xPos) # 60%, 2.58
-            output = math.sin(xPos)  # 56%, 2.45
-            output = math.cos(xPos)  # 25%, 2.45
+        ''' output = math.tanh(xPos)  # 60%, 2.58
+            output = math.sin(xPos)   # 56%, 2.45
+            output = math.cos(xPos)   # 25%, 2.45
+            output = math.fabs(xPos)  # 78%, 2.56 (guessed notAlbe every time)
+            output = math.asinh(xPos) # 65%, 2.8
         '''
         
         return float(output)
@@ -127,11 +127,11 @@ class network():
         for testNum in range(tests):
             # self.data[place] = [weight, bias, cost]
             # EX -> bias = self.data[place][1]
-
             startingTime, threads = time.time(), [None]*trials
 
-            for trialCount in range(trials):
-                randomImage = facialData.image()
+            for trialCount in range(trials + (trials%2)):
+                img = 'albe' if trialCount%2==0 else None
+                randomImage = facialData.image(img)
                 pixels = facialData.convertImage(randomImage[0], self.inputSize, False)
 
                 # testInfo = self.testNetwork(pixels, randomImage[1])
@@ -169,7 +169,7 @@ pixels = facialData.convertImage(randomImage, 192, False)
 
 # network ( [Inputs, Layer Xo -Xm, outputLen] )
 outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
-neural = network([len(pixels), 10, 2], outputLayer)
+neural = network([len(pixels), 50, 2], outputLayer)
 neural.trainNetwork(25, 10)
 
 
@@ -191,8 +191,8 @@ print(f'Analyze\'s {ips}im/s with {(accuracy/50) * 100}% Accuracy \n')
 
 
 # Visual testing
-for _ in range(4):
-    img = facialData.image(None if _!=3 else 'albe')
+for _ in range(6):
+    img = facialData.image(None if _%2==0 else 'albe')
     pix = facialData.convertImage(img[0], neural.inputSize, True)
 
     testInfo = neural.testNetwork(pix, neural.convertEXPO(img[1]))
