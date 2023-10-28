@@ -2,8 +2,11 @@
 # 10/17/2023
 # Facial Recognition AI
 
+# repurpose network by editing network -> 'convertExpo'
+
 from imageSplit import processImage
 from colorama import Fore
+import threading
 import random
 import math
 import time
@@ -32,15 +35,21 @@ class network():
                 self.layers[place].append(layerPos)
                 self.layers[place][layerPos] = 0 
 
-        # Data hashmaps
-        self.expectedOutput = {'albe': 0, 'dad' : 1, 'mom': 1, 'rudy': 1, 'chichi': 1}
-        self.booleanColors = {True: Fore.GREEN, False: Fore.RED} # Purely astetic
-
         # tempData -> input gets passed through
         # beforeInput -> saved list of weights (before input)
         # layers -> list of weights that gets saved (best performant)
         self.tempData = self.beforeInput = self.layers
-        self.costData = [10, 0] # perm, temp
+        self.costData = [5000, 0] # perm, temp
+
+    # converts expectedOutput to activated neuron
+    def convertEXPO(self, output, rvs=False):
+        if rvs:
+            data = {0:'albe', 1:'mom', 2:'dad', 3:'rudy', 4:'chichi'}
+            return data[output]
+        
+        else:
+            data = {'albe': 0, 'mom': 1, 'dad':2, 'rudy':3, 'chichi':4}
+            return data[output]
 
     # values EVERY NEURON IN THE NETWORK
     def valueNeurons(self, weights=None):
@@ -60,17 +69,24 @@ class network():
     # inpu = previous layer, weights = current layer
     def outputNeuron(self, inputs, weight, bias=0):
         xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
+        
         output = math.tanh(xPos)
-
+        ''' output = math.tanh(xPos) # 60%, 2.58
+            output = math.sin(xPos)  # 56%, 2.45
+            output = math.cos(xPos)  # 25%, 2.45
+        '''
+        
         return float(output)
 
     # tests network by going through ALL LAYERS
     # ONE CALL = full network call
-    def testNetwork(self, input, expectedOutput):
+    def testNetwork(self, input, expectedOutput, ret=None):
         self.tempData[0] = input
 
         # loop through each layer
         for cl in range(length:= len(self.tempData) - 1):
+            if cl == 0: continue
+            
             currentLayer = self.tempData[cl]
             nextLayer = self.tempData[cl + 1]
 
@@ -82,21 +98,26 @@ class network():
         
         # calculate cost (N0 = Albe, N1 = Not Albe)
         cost, currentLayer = 0, self.tempData[-1]
-        expectedOutput = self.expectedOutput[expectedOutput]
+        # expectedOutput = self.expectedOutput[expectedOutput]
+        # expectedOutput is the NEURON that should be activated (1-#output)
+
         actualOutput = currentLayer.index(max(currentLayer))
 
         # loops through all output
         for i in range(len(currentLayer)):
-            # if this output is not expected, then subtract 1
-            currentLayer[i] -= 1 if (i != expectedOutput) else 0
-            cost += currentLayer[i] ** 2
+            # (Expected output - actual output) ^2
+            expected:bool = (i == expectedOutput)
+            currentLayer[i] -= (0 if expected else 1)
+            cost += math.pow( currentLayer[i],  2 )
             
+        if ret: ret[1] += cost
         return [cost, bool(actualOutput == expectedOutput), actualOutput]
 
     # trains the network for the most optimal weights
     def trainNetwork(self, tests: int, trials: int):
         # creates starting values for neurons
         self.valueNeurons()
+        booleanColors = {True: Fore.GREEN, False: Fore.RED}
         self.layers = self.beforeInput = self.tempData
 
         # loops (tests) times to generate new
@@ -105,15 +126,19 @@ class network():
             # self.data[place] = [weight, bias, cost]
             # EX -> bias = self.data[place][1]
 
-            startingTime = time.time()
+            startingTime, threads = time.time(), [None]*trials
+
             for trialCount in range(trials):
                 randomImage = facialData.image()
                 pixels = facialData.convertImage(randomImage[0], self.inputSize, False)
 
-                testInfo = self.testNetwork(pixels, randomImage[1])
-                self.costData[1] += testInfo[0]
+                # testInfo = self.testNetwork(pixels, randomImage[1])
+                arguments = (pixels, self.convertEXPO(randomImage[1]), self.costData)
+                threads[trialCount] = threading.Thread(target=self.testNetwork, args=arguments)
+                threads[trialCount].start()
 
-            # average cost amongst trials
+            # waits for all tests to finish and adds up all cost
+            for thread in threads: thread.join()
             self.costData[1] /= trials
             
             # if a new best cost is found
@@ -121,7 +146,7 @@ class network():
                 self.layers = self.beforeInput # updates layers (Best Weights)
                 self.costData[0] = self.costData[1] # updates lowest cost
                 
-            print(self.booleanColors[bestCost] + f'Cost: {self.costData[1]}' + Fore.WHITE)
+            print(booleanColors[bestCost] + f'Cost: {self.costData[1]}' + Fore.WHITE)
             print(f'--> Compute Time: {time.time() - startingTime}\n')
             self.costData[1] = 0    
                 
@@ -134,34 +159,32 @@ randomImage = facialData.image()[0]
 pixels = facialData.convertImage(randomImage, 192, False)
 
 # network ( [Inputs, Layer Xi, Outputs] )
-neural = network( [len(pixels), 10, 2] )
-neural.trainNetwork(50, 5)
+neural = network( [len(pixels), 10, 5] )
+neural.trainNetwork(25, 10)
 
 
 # accuracy testing (non-visual)
 accuracy = 0
 print(Fore.MAGENTA + f'\nTesting Accuracy... ' + Fore.WHITE)
 
+avgComputeTime = time.time()
 for testNum in range(50):
     ra = facialData.image()
     pix = facialData.convertImage(ra[0], neural.inputSize, False)
 
-    testInfo = neural.testNetwork(pix, ra[1])
+    testInfo = neural.testNetwork(pix, neural.convertEXPO(ra[1]))
     if testInfo[1] == True:
         accuracy += 1
 
-print(f'Network has an accuracy of {(accuracy/50) * 100}%')
+ips = math.floor(60 / (( time.time() - avgComputeTime) / 50))
+print(f'Analyze\'s {ips}im/s with {(accuracy/50) * 100}% Accuracy')
 
 
 # Visual testing
 for _ in range(4):
-    if _%4!=0:
-        ra = facialData.image()
-    else:
-        ra = facialData.image('albe')
+    img = facialData.image(None if _!=3 else 'albe')
+    pix = facialData.convertImage(img[0], neural.inputSize, True)
 
-    pix = facialData.convertImage(ra[0], neural.inputSize, True)
-
-    testInfo = neural.testNetwork(pix, ra[1])
-    formatted = 'Is' if (testInfo[2] == 0) else 'Not'
-    print(f'{formatted} a picture of albe.. (Thats a {testInfo[1]} statement)')
+    testInfo = neural.testNetwork(pix, neural.convertEXPO(img[1]))
+    formatted = Fore.GREEN if testInfo[1] else Fore.RED
+    print(formatted + f'{neural.convertEXPO(testInfo[2], True)}' + Fore.WHITE)
