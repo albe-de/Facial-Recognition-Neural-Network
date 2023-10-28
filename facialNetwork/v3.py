@@ -110,7 +110,7 @@ class network():
     def loadingBar(self, iteration, total, barLen=50):
         arrow = '=' * int(round((iteration / total) * barLen))
         spaces = ' ' * (barLen - len(arrow))
-        sys.stdout.write(f'[{arrow}>{spaces}] {(iteration / total) * 100:.2f}%\r')
+        sys.stdout.write(f'{arrow}>{spaces} {(iteration / total) * 100:.2f}%\r')
         sys.stdout.flush()
 
     # trains the network for the most optimal weights
@@ -168,8 +168,8 @@ randomImage = facialData.image()[0]
 pixels = facialData.convertImage(randomImage, 192, False)
 
 # network ( [Inputs, Layer Xo -Xm, outputLen] )
-outputLayer = {'albe': 0, 'mom': 1, 'dad':2, 'rudy': 3, 'chichi': 4}
-neural = network([len(pixels), 10, 5, len(outputLayer)], outputLayer)
+outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
+neural = network([len(pixels), 10, 2], outputLayer)
 neural.trainNetwork(25, 10)
 
 
