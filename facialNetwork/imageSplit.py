@@ -25,7 +25,7 @@ class processImage():
 
         return [imagePath, picked]
         
-    def convertImage(self, image, pixelSize, display):
+    def convertImage(self, image, pixelSize, display=False):
         # converts data to greyscale
         image = Image.open(image).convert('L')
         image.thumbnail((pixelSize, pixelSize))
