@@ -28,6 +28,7 @@ facialNetwork: code that the AI uses to function
   imageSplit.py: class to pull and process images from dataImages
   v3.py:         neural network class + execution 
   customIter/py: no use (as of now)
+  hillStep.py:   WIP version of 'v3' that uses hillstep backpropogation
     
 LICENSE.txt: programs copyright license 
 README.md:   information about the program (where you are now :) )
