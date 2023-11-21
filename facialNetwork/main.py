@@ -1,7 +1,6 @@
 from imageSplit import processImage
 from adalbertflow import network
 from colorama import Fore
-import random
 import math
 import time
 import os
@@ -18,17 +17,15 @@ class dataBank():
         pixels = images.convertImage(randomImage[0], size)
         return [pixels, randomImage[1]]
     
-images = dataBank()
 os.system('cls')
-
-# pullRandom[0] = Formatted inputs (EX: [0, 0, 1, 1, 0.5, 0] )
-# pullRandom[1] = Expected outputs (EX: 'bus', 'stop sign', ect)
-# network ( [Inputs, Layer Xo -Xm, outputLen] )
-outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
-
+images = dataBank()
 inputSize = len(images.pullRandom()[0])
-neural = network([inputSize, 10, 10, 2], outputLayer, images)
-neural.trainNetwork(50, 5)
+
+# network ( [Inputs, Layer Xo -Xm, outputLen] )
+# networkInfo, outputLayer, trainingInputs
+outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
+neural = network( [inputSize, 10, 5, 2], outputLayer, images )
+neural.trainNetwork()
 
 # accuracy testing (non-visual)
 accuracy = 0

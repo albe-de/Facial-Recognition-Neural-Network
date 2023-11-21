@@ -3,6 +3,17 @@
 # Neural Network Class
 # 'Adalbertflow' :)
 
+
+'''
+
+1) FIX ACCURACY
+2) MAKE THE CODE NOT LOOK TERRIBLE
+2) MAKE OWN THREADING CLASS THAT DOESNT REQ FUNCTIONS
+3) MAKE IT RUN IN THREADS :)
+
+
+'''
+
 from colorama import Fore
 import random
 import math
@@ -40,30 +51,22 @@ class network():
         self.trainingInputs = trainingInputs
         
     # values EVERY NEURON IN THE NETWORK
-    def valueNeurons(self, weights=None):
-        for Li in range(len(self.tempData)):
-            for Ni in range(len(self.tempData[Li])):
-
-                # assigns random value or predefined value to neuron
-                val = random.randint(0, 1000) / 1000
-                if (weights): val = weights[Li][Ni]
-                    
-                self.tempData[Li][Ni] = val
-        
-        # not all calls require an intake
-        return self.tempData
+    def valueNeurons(self, weights=None ):
+        if weights: self.tempData = weights
+        else: self.tempData = [[random.random() for _ in r] for r in self.tempData]
             
     # y(i) = tanh ( bias + inpu(i) * weights(i) )
     # inpu = previous layer, weights = current layer
     def outputNeuron(self, inputs, weight, bias=0):
         xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
         
-        output = math.tanh(xPos)
-        ''' output = math.tanh(xPos)  # 60%, 2.58
+        output = math.asinh(xPos)
+        ''' output = math.tanh(xPos)  # 75%, 2.58
             output = math.sin(xPos)   # 56%, 2.45
             output = math.cos(xPos)   # 25%, 2.45
-            output = math.fabs(xPos)  # 78%, 2.56 (guessed notAlbe every time)
             output = math.asinh(xPos) # 65%, 2.8
+            output = math.erf(xPos)   # 40%, 5000im/s
+            output = math.tan(xPos)   # 60%, 5300im/s
         '''
         
         return float(output)
@@ -113,7 +116,7 @@ class network():
         sys.stdout.flush()
 
     # trains the network for the most optimal weights
-    def trainNetwork(self, tests: int, trials: int):
+    def trainNetwork(self, tests=25, trials=5):
         self.layers = self.beforeInput = self.tempData
         trials += trials % 2
         print('Training...')
@@ -186,4 +189,43 @@ for testNum in range(50):
 
 ips = math.floor(60 / (( time.time() - avgComputeTime) / 50))
 print(f'Analyzes {ips} im/s with {(accuracy/50) * 100:.2f}% Accuracy \n')
+'''
+
+'''
+def trainNetwork(self, tests: int, trials: int):
+        self.layers = self.beforeInput = self.tempData
+        trials += trials % 2
+        print('Training...')
+
+        # loops (tests) times to generate new
+        # weights, biases, & costs
+        for testNum in range(tests):
+            # self.data[place] = [weight, bias, cost]
+            # EX -> bias = self.data[place][1]
+            self.costData[1] = 0 
+
+            for trialCount in range(trials):
+                # randomImage[0] = Formatted inputs (EX: [0, 0, 1, 1, 0.5, 0] )
+                # randomImage[1] = Expected outputs (EX: 'bus', 'stop sign', ect)
+                randomImage = self.trainingInputs.pullRandom(self.inputSize)
+                expectedOutput = self.convertEXPO(randomImage[1])
+
+                testInfo = self.testNetwork(randomImage[0], expectedOutput)
+                self.costData[1] += testInfo[0]
+                self.testingIterations += 1
+
+                self.loadingBar(self.testingIterations, tests*trials)
+
+            self.costData[1] /= trials
+            
+            # if a new best cost is found
+            if bestCost:= self.costData[1] < self.costData[0]:
+                self.layers = self.beforeInput # updates layers (Best Weights)
+                self.costData[0] = self.costData[1] # updates lowest cost
+                
+            self.valueNeurons()
+            self.beforeInput = self.tempData
+        
+        print(f'\nCost: {self.costData[0]}' + Fore.WHITE)
+        self.testingIterations = 0
 '''
