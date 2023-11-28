@@ -1,26 +1,32 @@
 # Adalberto de Hombre
-# 1/11/2023
+# 1/11/2023 (v0.0.0) - 11/27/23 (v3.1.3)
 # Neural Network Class
 # 'Adalbertflow' :)
 
-
-'''
-
-1) FIX ACCURACY
-2) MAKE THE CODE NOT LOOK TERRIBLE
-2) MAKE OWN THREADING CLASS THAT DOESNT REQ FUNCTIONS
-3) MAKE IT RUN IN THREADS :)
-
-
-'''
-
 from colorama import Fore
+import numpy as np
 import random
 import math
 import sys
 
 class network():
-    def __init__(self, networkInfo, outputLayer, trainingInputs):
+    '''
+    networkInfo = Diagram of the networks layout
+        ex: [inputSize, x0,- xm, outputSize]
+    
+    outputLayer = Diagram of the output layout
+        ex: {'item0': 0, 'item1': 1, 'neuron3': 2}
+    
+    trainingInputs = class representing the databank
+        must have 'pullRandom' function that process data into [x0, x1,- xm]
+        trainingInputs -> pullRandom():: returns [processedData, value (EX: 'item0')]
+    
+    trainingBias = the output that should be relayed to remove overfitting
+        ex: if outputLayer looks like {'item0': 0, 'item1': 1, 'neuron3': 1}
+            then a trainingBias may be set to 'item0' to intentionally
+            relay it throughout training
+    '''
+    def __init__(self, networkInfo, outputLayer, trainingInputs, trainingBias=None):
         self.inputSize = networkInfo[0]
         self.layers = self.storedData = []
         self.outputLayer = outputLayer
@@ -49,6 +55,7 @@ class network():
         self.costData = [5000, 5000] # perm, temp
         self.testingIterations = 0
         self.trainingInputs = trainingInputs
+        self.trainingBias = trainingBias
         
     # values EVERY NEURON IN THE NETWORK
     def valueNeurons(self, weights=None ):
@@ -60,7 +67,7 @@ class network():
     def outputNeuron(self, inputs, weight, bias=0):
         xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
         
-        output = math.asinh(xPos)
+        output = math.tanh(xPos)
         ''' output = math.tanh(xPos)  # 75%, 2.58
             output = math.sin(xPos)   # 56%, 2.45
             output = math.cos(xPos)   # 25%, 2.45
@@ -70,6 +77,14 @@ class network():
         '''
         
         return float(output)
+
+    # determines the cost of the output (sample)
+    def linearReg(self, y_pred, y_true, delta=1.0):
+        ''' mean sqrt        ~65.3475%avg      bias 1/3   17im/s
+            reLu             ~44.043%avg       bias 1/3   18im/s
+            multi-binary     ~34.05%avg        bias 1/3   14im/s
+            hubert/robust    ~18.42345%avg     bias 1/3   15im/s '''
+        return 0.5* ((y_true[1] - y_pred[1])**2 + (y_true[0] - y_pred[0])**2)
 
     # tests network by going through ALL LAYERS
     # ONE CALL = full network call
@@ -103,7 +118,19 @@ class network():
             expected:bool = (i == expectedOutput)
             outputLayer[i] -= (0 if expected else 1)
 
-            cost += math.pow( outputLayer[i],  2 )
+            cost += outputLayer[i]**2 #math.pow( outputLayer[i],  2 )
+        
+        '''
+        BINARY CROSS REGRESSION:;
+
+        ypred = []
+        for i in range(len(outputLayer)):
+            expected:bool = (i == expectedOutput)
+
+            ypred.append(len(ypred)) 
+            ypred[len(ypred) - 1] = 1.0 if expected else 0.0
+
+        cost = self.binaryCross(ypred, outputLayer)'''
             
         # if ret: ret[1] += cost
         return [cost, bool(actualOutput == expectedOutput), actualOutput]
@@ -129,9 +156,13 @@ class network():
             self.costData[1] = 0 
 
             for trialCount in range(trials):
+                bias = None
+                if self.trainingBias and trialCount == 1:
+                    bias = self.trainingBias
+
                 # randomImage[0] = Formatted inputs (EX: [0, 0, 1, 1, 0.5, 0] )
                 # randomImage[1] = Expected outputs (EX: 'bus', 'stop sign', ect)
-                randomImage = self.trainingInputs.pullRandom(self.inputSize)
+                randomImage = self.trainingInputs.pullRandom(self.inputSize, bias)
                 expectedOutput = self.convertEXPO(randomImage[1])
 
                 testInfo = self.testNetwork(randomImage[0], expectedOutput)
@@ -158,74 +189,16 @@ class network():
         try: return self.outputLayer[output]
         except: return {v:k for k, v in self.outputLayer.items()}[output]
 
+    # reads/updates stored weights from specified database
+    def accessDatabase(self, read, fileLocation):
+        if not read:
+            condensedData = self.beforeInput
+            condensedData[0] = []
+            condensedData = '\n'.join(map(str, condensedData))
 
-# goonery: 
-#   * outputNeuron function
-#   * make sure covertEXPO works
-#   * hill stepping
-#   * mess with nonlinearity
-'''
-randomImage = facialData.image()[0]
-pixels = facialData.convertImage(randomImage, 192)
+            with open(fileLocation, "w") as file:
+                file.write(condensedData)
 
-# network ( [Inputs, Layer Xo -Xm, outputLen] )
-outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
-neural = network([len(pixels), 10, 5, 2], outputLayer)
-neural.trainNetwork(25, 10)
-
-///////////
-
-# accuracy testing (non-visual)
-accuracy = 0
-print(f'\nTesting Accuracy... ' + Fore.WHITE)
-
-avgComputeTime = time.time()
-for testNum in range(50):
-    ra = facialData.image()
-    pix = facialData.convertImage(ra[0], neural.inputSize)
-
-    testInfo = neural.testNetwork(pix, neural.convertEXPO(ra[1]))
-    if testInfo[1]: accuracy += 1
-
-ips = math.floor(60 / (( time.time() - avgComputeTime) / 50))
-print(f'Analyzes {ips} im/s with {(accuracy/50) * 100:.2f}% Accuracy \n')
-'''
-
-'''
-def trainNetwork(self, tests: int, trials: int):
-        self.layers = self.beforeInput = self.tempData
-        trials += trials % 2
-        print('Training...')
-
-        # loops (tests) times to generate new
-        # weights, biases, & costs
-        for testNum in range(tests):
-            # self.data[place] = [weight, bias, cost]
-            # EX -> bias = self.data[place][1]
-            self.costData[1] = 0 
-
-            for trialCount in range(trials):
-                # randomImage[0] = Formatted inputs (EX: [0, 0, 1, 1, 0.5, 0] )
-                # randomImage[1] = Expected outputs (EX: 'bus', 'stop sign', ect)
-                randomImage = self.trainingInputs.pullRandom(self.inputSize)
-                expectedOutput = self.convertEXPO(randomImage[1])
-
-                testInfo = self.testNetwork(randomImage[0], expectedOutput)
-                self.costData[1] += testInfo[0]
-                self.testingIterations += 1
-
-                self.loadingBar(self.testingIterations, tests*trials)
-
-            self.costData[1] /= trials
-            
-            # if a new best cost is found
-            if bestCost:= self.costData[1] < self.costData[0]:
-                self.layers = self.beforeInput # updates layers (Best Weights)
-                self.costData[0] = self.costData[1] # updates lowest cost
-                
-            self.valueNeurons()
-            self.beforeInput = self.tempData
-        
-        print(f'\nCost: {self.costData[0]}' + Fore.WHITE)
-        self.testingIterations = 0
-'''
+        else:
+            with open(fileLocation, "r") as file:
+               self.beforeInput = file.read().split('\n')
