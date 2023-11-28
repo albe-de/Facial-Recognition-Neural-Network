@@ -28,7 +28,7 @@ inputSize = len(images.pullRandom()[0])
 outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
 neural = network( [inputSize, 10, 10, 2], outputLayer, images, 'albe' )
 
-neural.trainNetwork()
+neural.trainNetwork(25, 10)
 # neural.layers = neural.accessDatabase(True, dataBase)
 
 # accuracy testing (non-visual)
@@ -37,15 +37,13 @@ print(f'\nTesting Accuracy... ' + Fore.WHITE)
 
 avgComputeTime, tests = time.time(), 50
 for testNum in range(tests):
-    bbias = None
-    if testNum %5 == 0:
-        bbias = 'albe'
+    
         
-    ra = images.pullRandom(inputSize, bbias)
-    testInfo = neural.testNetwork(ra[0], neural.convertEXPO(ra[1]))
+    ra = images.pullRandom(inputSize)
+    testInfo = neural.testNetwork(ra[0], outputLayer[ra[1]])
 
     formatted = Fore.GREEN if testInfo[1] == True else Fore.RED
-    print(formatted + f'{neural.convertEXPO(testInfo[2])}' + Fore.WHITE)
+    print(formatted + f'{ra[1]}' + Fore.WHITE)
 
     if testInfo[1]: accuracy += 1
 

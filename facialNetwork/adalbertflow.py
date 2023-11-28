@@ -67,7 +67,8 @@ class network():
     def outputNeuron(self, inputs, weight, bias=0):
         xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
         
-        output = math.tanh(xPos)
+        output = 1/(1 + math.pow(math.e, -1*xPos))
+        # output = (math.e**(2 * xPos) -1) / (math.e**(2 * xPos) +1)
         ''' output = math.tanh(xPos)  # 75%, 2.58
             output = math.sin(xPos)   # 56%, 2.45
             output = math.cos(xPos)   # 25%, 2.45
@@ -101,7 +102,7 @@ class network():
             # loop through each neuron
             for neuron in range(len(nextLayer)):
                 # values the neuron
-                bias = random.randint(0, 100)/100
+                bias = random.randint(-100, 100)/100
                 neuronValue = self.outputNeuron(currentLayer, nextLayer[neuron], bias)
                 nextLayer[neuron] = neuronValue
         
@@ -157,13 +158,15 @@ class network():
 
             for trialCount in range(trials):
                 bias = None
-                if self.trainingBias and trialCount == 1:
+
+                # training bias of 1/3
+                if self.trainingBias and trialCount < (trials/3):
                     bias = self.trainingBias
 
                 # randomImage[0] = Formatted inputs (EX: [0, 0, 1, 1, 0.5, 0] )
                 # randomImage[1] = Expected outputs (EX: 'bus', 'stop sign', ect)
                 randomImage = self.trainingInputs.pullRandom(self.inputSize, bias)
-                expectedOutput = self.convertEXPO(randomImage[1])
+                expectedOutput = self.outputLayer[randomImage[1]]
 
                 testInfo = self.testNetwork(randomImage[0], expectedOutput)
                 self.costData[1] += testInfo[0]
@@ -184,11 +187,6 @@ class network():
         print(f'\nCost: {self.costData[0]}' + Fore.WHITE)
         self.testingIterations = 0
 
-    # converts expectedOutput to activated neuron
-    def convertEXPO(self, output):
-        try: return self.outputLayer[output]
-        except: return {v:k for k, v in self.outputLayer.items()}[output]
-
     # reads/updates stored weights from specified database
     def accessDatabase(self, read, fileLocation):
         if not read:
@@ -202,3 +200,17 @@ class network():
         else:
             with open(fileLocation, "r") as file:
                self.beforeInput = file.read().split('\n')
+
+'''
+
+1) Create array-collapse function for simple conversion
+[[x0, x1,- xm], [x0, x1,- xm], xm] -> [x0, x1,- xm]
+
+2) use collsapsed arrays for backpropogation
+hillstepping X
+gradient desent X
+linear regression X
+
+potentially use numpy arrays for a gradient ^^
+
+'''
