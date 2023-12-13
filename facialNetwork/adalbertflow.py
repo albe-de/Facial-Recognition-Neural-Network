@@ -5,6 +5,7 @@
 
 from colorama import Fore
 import numpy as np
+import threading
 import random
 import math
 import sys
@@ -53,30 +54,25 @@ class network():
         # layers -> list of weights that gets saved (best performant)
         self.tempData = self.beforeInput = self.layers
         self.costData = [5000, 5000] # perm, temp
-        self.testingIterations = 0
         self.trainingInputs = trainingInputs
         self.trainingBias = trainingBias
         
     # values EVERY NEURON IN THE NETWORK
     def valueNeurons(self, weights=None ):
         if weights: self.tempData = weights
-        else: self.tempData = [[random.random() for _ in r] for r in self.tempData]
-            
+        else: 
+            self.tempData = [[random.randint(-1e4, 1e4)/1e4 for _ in r] for r in self.tempData]
+            #self.tempData = [[self.outputNeuron([random.randint(-1e4, 1e4)/1e4] * 
+            #random.randint(1, len(self.layers[2])), random.randint(-1e4, 1e4)/1e4) for _ in r] for r in self.tempData]
+
     # y(i) = tanh ( bias + inpu(i) * weights(i) )
     # inpu = previous layer, weights = current layer
     def outputNeuron(self, inputs, weight, bias=0):
-        xPos = sum(weight * x for x in inputs) + bias # numpy.dot(inpu, weights)
-        
+        # sigmoid(dot) for nonlinearities
+        xPos = sum(weight * x for x in inputs) + bias # np.dot(inpu, weights)
         output = 1/(1 + math.pow(math.e, -1*xPos))
-        # output = (math.e**(2 * xPos) -1) / (math.e**(2 * xPos) +1)
-        ''' output = math.tanh(xPos)  # 75%, 2.58
-            output = math.sin(xPos)   # 56%, 2.45
-            output = math.cos(xPos)   # 25%, 2.45
-            output = math.asinh(xPos) # 65%, 2.8
-            output = math.erf(xPos)   # 40%, 5000im/s
-            output = math.tan(xPos)   # 60%, 5300im/s
-        '''
-        
+        # output = (math.e**(2 * xPos) -1) / (math.e**(2 * xPos) +1) # -> tanh
+
         return float(output)
 
     # determines the cost of the output (sample)
@@ -102,7 +98,7 @@ class network():
             # loop through each neuron
             for neuron in range(len(nextLayer)):
                 # values the neuron
-                bias = random.randint(-100, 100)/100
+                bias = random.randint(-1000, 1000)/1000
                 neuronValue = self.outputNeuron(currentLayer, nextLayer[neuron], bias)
                 nextLayer[neuron] = neuronValue
         
@@ -111,7 +107,11 @@ class network():
         # expectedOutput = self.expectedOutput[expectedOutput]
         # expectedOutput is the NEURON that should be activated (1-#output)
 
-        actualOutput = outputLayer.index(max(outputLayer))
+        try: 
+            actualOutput = outputLayer.index(max(outputLayer))
+        except:
+            outputIdx = np.argmax(outputLayer)
+            actualOutput = outputLayer[outputIdx]
 
         # loops through all output
         for i in range(len(outputLayer)):
@@ -135,13 +135,6 @@ class network():
             
         # if ret: ret[1] += cost
         return [cost, bool(actualOutput == expectedOutput), actualOutput]
-
-    # loading bar animation in output
-    def loadingBar(self, iteration, total, barLen=50):
-        arrow = '=' * int(round((iteration / total) * barLen))
-        spaces = ' ' * (barLen - len(arrow))
-        sys.stdout.write(f'{arrow}>{spaces} {iteration/total * 100:.2f}%\r')
-        sys.stdout.flush()
 
     # trains the network for the most optimal weights
     def trainNetwork(self, tests=25, trials=5):
@@ -170,9 +163,6 @@ class network():
 
                 testInfo = self.testNetwork(randomImage[0], expectedOutput)
                 self.costData[1] += testInfo[0]
-                self.testingIterations += 1
-
-                self.loadingBar(self.testingIterations, tests*trials)
 
             self.costData[1] /= trials
             
@@ -187,10 +177,55 @@ class network():
         print(f'\nCost: {self.costData[0]}' + Fore.WHITE)
         self.testingIterations = 0
 
+    def decompileNetwork(self, learningRate=0.01, epochs=1000):
+        self.beforeInput = self.tempData
+        threads = []
+
+        # creates threads/layer for gradient decent
+        for n in range(len(self.tempData)):
+            if n == 0 or n+1 == len(self.tempData): continue
+            threads.append(n-1)
+            threads[n - 1] = threading.Thread(target=self.gradientDecent, args=(learningRate, epochs, n))
+
+        for t in threads: t.start()
+        for t in threads: t.join()
+
+    def gradientDecent(self, learningRate, epochs, n):
+        # layer is a memory address of tempData[n]
+        layer = self.tempData[n]
+        self.tempData[n] = np.array(layer, dtype=object)
+        bestCost = [100, []]
+
+        # loops 'epochs' times from XOffset -> (XOffset + learningrate(epochs))
+        epochs = int(epochs / learningRate)
+        for i in range(epochs):
+            # converts layer to numpy
+            gradient = np.zeros_like(self.tempData[n], dtype=object)
+            self.tempData[n].tolist()
+            cost = 0
+
+            # determines cost of layer[n]'s gradient
+            for trialCount in range(5):
+                randomImage = self.trainingInputs.pullRandom(self.inputSize)
+                expectedOutput = self.outputLayer[randomImage[1]]
+                
+                testInfo = self.testNetwork(randomImage[0], expectedOutput)
+                cost += testInfo[0]
+
+            if (cost / 5) < bestCost[0]:
+                print(cost/5)
+                bestCost = [(cost / 5), self.tempData[n]]
+                self.layers[n] = self.tempData[n]
+                self.beforeInput[n] = self.tempData[n]
+
+            # shifts model by -learningRate
+            self.tempData[n] = np.array(layer, dtype=object)
+            self.tempData[n] -= learningRate * gradient
+
     # reads/updates stored weights from specified database
     def accessDatabase(self, read, fileLocation):
         if not read:
-            condensedData = self.beforeInput
+            condensedData = self.layers
             condensedData[0] = []
             condensedData = '\n'.join(map(str, condensedData))
 
@@ -199,7 +234,7 @@ class network():
 
         else:
             with open(fileLocation, "r") as file:
-               self.beforeInput = file.read().split('\n')
+               self.layers = file.read().split('\n')
 
 '''
 

@@ -1,6 +1,7 @@
 from imageSplit import processImage
 from adalbertflow import network
 from colorama import Fore
+import threading
 import math
 import time
 import os
@@ -28,25 +29,40 @@ inputSize = len(images.pullRandom()[0])
 outputLayer = {'albe': 0, 'mom': 1, 'dad':1, 'rudy': 1, 'chichi': 1}
 neural = network( [inputSize, 10, 10, 2], outputLayer, images, 'albe' )
 
-neural.trainNetwork(25, 10)
+# neural.trainNetwork(25, 10)
 # neural.layers = neural.accessDatabase(True, dataBase)
-
-# accuracy testing (non-visual)
-accuracy = 0
-print(f'\nTesting Accuracy... ' + Fore.WHITE)
-
-avgComputeTime, tests = time.time(), 50
-for testNum in range(tests):
-    
-        
-    ra = images.pullRandom(inputSize)
-    testInfo = neural.testNetwork(ra[0], outputLayer[ra[1]])
-
-    formatted = Fore.GREEN if testInfo[1] == True else Fore.RED
-    print(formatted + f'{ra[1]}' + Fore.WHITE)
-
-    if testInfo[1]: accuracy += 1
-
-ips = tests / (time.time() - avgComputeTime)
-print(f'Analyzes {ips} im/s with {(accuracy/tests) * 100:.2f}% Accuracy \n')
+neural.decompileNetwork(5e-5, 5e-3)
 neural.accessDatabase(False, dataBase)
+
+# # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # DEEP ACCURACY TESTING # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # #
+
+avgComputeTime, tests = time.time(), 75
+accuracy = 0
+
+def computeAccuracy():
+    global accuracy
+
+    for testNum in range(tests):
+        ra = images.pullRandom(inputSize)
+        testInfo = neural.testNetwork(ra[0], outputLayer[ra[1]])
+
+        formatted = Fore.GREEN if testInfo[1] == True else Fore.RED
+        print(formatted + f'{ra[1]}' + Fore.WHITE)
+        if testInfo[1]: accuracy += 1
+
+    
+print(f'\nTesting Accuracy... ' + Fore.WHITE)
+threads, epochs = [], 1
+
+for i in range(epochs):
+    threads.append(i)
+    threads[i] = threading.Thread(target=computeAccuracy)
+
+for t in threads: t.start()
+for t in threads: t.join()
+
+ips = math.floor((tests * epochs) / (time.time() - avgComputeTime))
+accuracy = f"{(accuracy / tests) * (100/epochs):.2f}"
+print(f"Analysis {ips}/images sec at {accuracy}%")
