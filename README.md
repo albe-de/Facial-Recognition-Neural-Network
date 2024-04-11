@@ -1,8 +1,9 @@
 # Facial-Recognition-Neural-Network
 
 **Useage**
-This Network's soul purpose as of now is to determine if the photo its
+This Network's (current) purpose is to determine if the photo its
 analysing is a photo of me, or a photo of one of my family members.
+It can be easlily repurposed to anylize live video and update in real time.
 
 **Repurpose**
 To repurpose it, youll need to make some slight edits to the inputs, 
@@ -12,6 +13,7 @@ number of layers, size of layers, and code (like the hashmap in network->testNet
 You can use the code for whatever you'd like so long as you dont steal/take 
 credit for it and you dont sell it.
 (MIT license) 
+https://s3.ezgif.com/tmp/ezgif-3-bfa1128832.gif
 
 <pre>
 File Locations
@@ -21,7 +23,7 @@ backup: expired code archive (basically a save-file)
   customIter.py   no use (as of now)
   hillStep.py     expired WIP of backpropogated network
 
-dataImages: data set with images of me and my family members- used to train the AI
+dataImages (REMOVED FOR PRIVACY): data set with images of me and my family members- used to train the AI
   albe    PNG list with images of me
   chichi  PNG list with images of chichi
   dad     PNG list with images of my dad
