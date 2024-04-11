@@ -13,7 +13,7 @@ number of layers, size of layers, and code (like the hashmap in network->testNet
 You can use the code for whatever you'd like so long as you dont steal/take 
 credit for it and you dont sell it.
 (MIT license) 
-https://s3.ezgif.com/tmp/ezgif-3-bfa1128832.gif
+![networkOptimized](https://github.com/albe-de/Facial-Recognition-Neural-Network/assets/96357312/d0eff699-3b36-404f-b3d7-6ac2fffe5346)
 
 <pre>
 File Locations
