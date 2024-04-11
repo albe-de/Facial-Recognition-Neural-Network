@@ -14,8 +14,7 @@ number of layers, size of layers, and code (like the hashmap in network->testNet
 You can use the code for whatever you'd like so long as you dont steal/take 
 credit for it and you dont sell it.
 (MIT license) 
-
-<pre>
+![dots](https://github.com/albe-de/Facial-Recognition-Neural-Network/assets/96357312/cba13b79-14a4-4a50-ac49-1d1ae4817388)
 File Locations
 
 backup: expired code archive (basically a save-file)
