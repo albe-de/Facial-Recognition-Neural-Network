@@ -15,7 +15,8 @@ You can use the code for whatever you'd like so long as you dont steal/take
 credit for it and you dont sell it.
 (MIT license) 
 
-![dots](https://github.com/albe-de/Facial-Recognition-Neural-Network/assets/96357312/cba13b79-14a4-4a50-ac49-1d1ae4817388)
+- = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - =
+= - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = - = -
 
 File Locations
 
