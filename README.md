@@ -38,7 +38,9 @@ facialNetwork: code that the AI uses to function
  - main.py           executes the main network class
     
 LICENSE.txt   programs copyright license 
+
 README.md     information about the program (where you are now :) )
+
 todo          list of features for me to add/instructions for myself
 
 v1.00
