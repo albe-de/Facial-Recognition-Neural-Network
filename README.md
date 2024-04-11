@@ -20,22 +20,22 @@ credit for it and you dont sell it.
 File Locations
 
 backup: expired code archive (basically a save-file)
-  v3.py           neural network class + execution 
-  customIter.py   no use (as of now)
-  hillStep.py     expired WIP of backpropogated network
+ - v3.py           neural network class + execution 
+ - customIter.py   no use (as of now)
+ - hillStep.py     expired WIP of backpropogated network
 
 dataImages (REMOVED FOR PRIVACY): data set with images of me and my family members- used to train the AI
-  albe    PNG list with images of me
-  chichi  PNG list with images of chichi
-  dad     PNG list with images of my dad
-  mom     PNG list with images of my mom
-  rudy    PNG list with images of rudy
+ - albe    PNG list with images of me
+ - chichi  PNG list with images of chichi
+ - dad     PNG list with images of my dad
+ - mom     PNG list with images of my mom
+ - rudy    PNG list with images of rudy
       
 facialNetwork: code that the AI uses to function
-  __pycache__       regular pycache file
-  imageSplit.py     class to pull and process images from dataImages
-  adalbertflow.py   neural network class 
-  main.py           executes the main network class
+ - __pycache__       regular pycache file
+ - imageSplit.py     class to pull and process images from dataImages
+ - adalbertflow.py   neural network class 
+ - main.py           executes the main network class
     
 LICENSE.txt   programs copyright license 
 README.md     information about the program (where you are now :) )
